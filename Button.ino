@@ -1,46 +1,39 @@
 const int buttonPin = 0;        // D2 WEMOS
 int buttonState = false;         // True = on / False = off
+int oldButtonState = false;
+
+void ToggleButtonState()
+{
+ if (buttonState == true) {
+     buttonState = false;
+     digitalWrite(LED_BUILTIN, HIGH);
+ } else {
+    buttonState = true;
+    digitalWrite(LED_BUILTIN, LOW);
+ }
+}
 
 void setup() {
   Serial.begin(115200);
-
-  pinMode(buttonPin, INPUT);
+  attachInterrupt(digitalPinToInterrupt(buttonPin), ToggleButtonState, RISING);
   pinMode(LED_BUILTIN, OUTPUT);
-  LIGHTOFF();
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void LIGHTON()
-{
-    digitalWrite(LED_BUILTIN, LOW);
-    Serial.println("LED ON, BUTTON ON");
-}
-void LIGHTOFF()
-{
-    digitalWrite(LED_BUILTIN, HIGH);
-    Serial.println("LED OFF, BUTTON OFF");
-}
-
+int maxLoop = 75;
+int loopCount;
 void loop() {
-  if (digitalRead(buttonPin) == LOW) //Pressed  
-  {
-    delay(200); //elimates button spam on press
-    
-    //Toggle Button State
-    if (buttonState == true)
-    {
-      buttonState = false;
-    } else {
-      buttonState = true;
-    }
-    
-    //REPORT BUTTON STATE
-    if (buttonState == true) // Buttom is ON
-    {
-      LIGHTON();
-    }
-    else
-    {
-      LIGHTOFF();
-    }
+
+  Serial.print(".");
+  if (++loopCount > maxLoop) {
+     loopCount=0;
+     Serial.println();
+  }
+
+  if (oldButtonState != buttonState) {
+     oldButtonState = buttonState;
+     Serial.println();
+     Serial.println(buttonState);
+     delay(1000); 
   }
 }
